@@ -27,6 +27,7 @@ class HouseBuilder:
         wall_thickness (float): The thickness to apply to wall lines (default: 0.1 units)
         wall_height (float): The height to extrude walls vertically (default: 2.5 units)
         floor_offset (float): The Z-offset for the floor plane (default: -0.05 units)
+        room_metadata (dict): Stores room information for reference
     """
     
     def __init__(
@@ -46,6 +47,7 @@ class HouseBuilder:
         self.wall_thickness = wall_thickness
         self.wall_height = wall_height
         self.floor_offset = floor_offset
+        self.room_metadata: Dict[str, Dict[str, Any]] = {}
     
     def _create_wall_polygon(self, wall_coords: List[List[float]]) -> Polygon:
         """
@@ -163,6 +165,9 @@ class HouseBuilder:
             ValueError: If json_data is missing "walls" key or has invalid structure
             Exception: For any geometry processing errors
         """
+        # Extract room metadata if available
+        self.extract_room_info(json_data)
+        
         # Validate input structure
         if "walls" not in json_data:
             raise ValueError("JSON data must contain 'walls' key")
@@ -213,6 +218,61 @@ class HouseBuilder:
         )
         
         return scene
+    
+    def extract_room_info(self, json_data: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+        """
+        Extract room information from floor plan JSON.
+        
+        Args:
+            json_data: Floor plan data containing room metadata
+            
+        Returns:
+            Dictionary with room information (name, area, type, etc.)
+        """
+        rooms = {}
+        
+        if "rooms" in json_data:
+            for room_id, room_data in json_data["rooms"].items():
+                rooms[room_id] = {
+                    "name": room_data.get("name", "Room"),
+                    "type": room_data.get("type", "unknown"),
+                    "dimensions": room_data.get("dimensions", [0, 0]),
+                    "area": room_data.get("area", 0),
+                    "position": room_data.get("position", [0, 0])
+                }
+        
+        self.room_metadata = rooms
+        return rooms
+    
+    def get_room_summary(self) -> str:
+        """
+        Generate a text summary of all rooms.
+        
+        Returns:
+            Formatted string with room details
+        """
+        if not self.room_metadata:
+            return "No room information available"
+        
+        summary = "Floor Plan Rooms:\n" + "=" * 40 + "\n"
+        total_area = 0
+        
+        for room_id, info in self.room_metadata.items():
+            name = info.get("name", "Unknown")
+            area = info.get("area", 0)
+            dimensions = info.get("dimensions", [0, 0])
+            
+            summary += f"\n{name}:\n"
+            summary += f"  Type: {info.get('type', 'N/A')}\n"
+            summary += f"  Dimensions: {dimensions[0]:.2f}m × {dimensions[1]:.2f}m\n"
+            summary += f"  Area: {area:.2f} sq.m\n"
+            
+            total_area += area
+        
+        summary += "\n" + "=" * 40 + "\n"
+        summary += f"Total Area: {total_area:.2f} sq.m\n"
+        
+        return summary
     
     def export_to_glb(self, scene: trimesh.Scene, output_path: str) -> None:
         """

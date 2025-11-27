@@ -10,10 +10,16 @@ Purpose: User-friendly interface for the HouseBuilder engine
 
 import json
 import os
+import sys
 import tempfile
 from typing import Optional, Tuple
 import gradio as gr
+
+# Add src to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../src'))
+
 from builder import HouseBuilder
+from floor_plan_generator import create_floor_plan
 
 
 # Sample floor plan data for demonstration purposes
@@ -56,21 +62,56 @@ def generate_sample_json() -> str:
     return temp_file.name
 
 
-def process_floor_plan(uploaded_file: Optional[gr.File]) -> Tuple[Optional[str], str]:
+def generate_template_json(template: str) -> Tuple[str, str]:
+    """
+    Generate a floor plan from a predefined template.
+    
+    Args:
+        template: Template name ('1bhk', '2bhk', '3bhk', 'villa', 'penthouse')
+    
+    Returns:
+        Tuple of (file_path, status_message)
+    """
+    try:
+        # Create floor plan from template
+        floor_plan = create_floor_plan(template)
+        
+        # Create temporary file
+        temp_file = tempfile.NamedTemporaryFile(
+            mode='w',
+            suffix='.json',
+            delete=False,
+            prefix=f'{template}_'
+        )
+        
+        json.dump(floor_plan, temp_file, indent=2)
+        temp_file.close()
+        
+        status_msg = (
+            f"✅ Generated {floor_plan['name']}\n"
+            f"📐 Total Area: {floor_plan['total_area']:.2f} sq.m\n"
+            f"🏠 Rooms: {len(floor_plan['rooms'])}"
+        )
+        
+        return temp_file.name, status_msg
+        
+    except Exception as e:
+        raise gr.Error(f"Error generating template: {str(e)}")
+
+
+def process_floor_plan(uploaded_file: Optional[gr.File]) -> Tuple[Optional[str], str, str]:
     """
     Process an uploaded JSON floor plan and generate a 3D model.
     
     This function serves as the main processing pipeline for the Gradio interface.
     It validates the input, invokes the HouseBuilder, and returns the 3D model
-    along with status information.
+    along with status information and room details.
     
     Args:
         uploaded_file: A Gradio File object containing the uploaded JSON
         
     Returns:
-        A tuple of (glb_file_path, status_message)
-        - glb_file_path: Path to the generated GLB file, or None if error
-        - status_message: Human-readable status/error message
+        A tuple of (glb_file_path, status_message, room_details)
         
     Raises:
         gr.Error: For user-facing errors (malformed JSON, missing data, etc.)
@@ -124,13 +165,46 @@ def process_floor_plan(uploaded_file: Optional[gr.File]) -> Tuple[Optional[str],
         
         # Generate success message
         wall_count = len(json_data["walls"])
+        plan_name = json_data.get("name", "Floor Plan")
+        plan_desc = json_data.get("description", "")
+        total_area = json_data.get("total_area", 0)
+        
         status_message = (
             f"✅ Successfully generated 3D model!\n"
+            f"📋 Plan: {plan_name}\n"
             f"📊 Processed {wall_count} wall{'s' if wall_count != 1 else ''}\n"
             f"📦 Output format: GLB (compatible with all 3D viewers)"
         )
         
-        return output_file.name, status_message
+        if plan_desc:
+            status_message += f"\n📝 {plan_desc}"
+        
+        # Generate room details
+        room_details = ""
+        if "rooms" in json_data:
+            room_details = "📐 Room Details:\n" + "-" * 35 + "\n\n"
+            total_room_area = 0
+            
+            for room_id, room_info in json_data["rooms"].items():
+                name = room_info.get("name", "Room")
+                area = room_info.get("area", 0)
+                room_type = room_info.get("type", "")
+                dimensions = room_info.get("dimensions", [0, 0])
+                
+                room_details += f"🏠 {name}\n"
+                if room_type:
+                    room_details += f"   Type: {room_type}\n"
+                room_details += f"   Dimensions: {dimensions[0]:.2f}m × {dimensions[1]:.2f}m\n"
+                room_details += f"   Area: {area:.2f} sq.m\n\n"
+                total_room_area += area
+            
+            room_details += "-" * 35 + "\n"
+            room_details += f"Total Room Area: {total_room_area:.2f} sq.m"
+        
+        if total_area > 0:
+            room_details += f"\n\n📏 Total Plan Area: {total_area:.2f} sq.m"
+        
+        return output_file.name, status_message, room_details
         
     except json.JSONDecodeError as e:
         raise gr.Error(
@@ -152,7 +226,7 @@ def create_interface() -> gr.Blocks:
     """
     Create and configure the Gradio web interface.
     
-    Builds a professional-looking UI with file upload, sample download,
+    Builds a professional-looking UI with file upload, template selection,
     3D visualization, and comprehensive error handling.
     
     Returns:
@@ -171,7 +245,7 @@ def create_interface() -> gr.Blocks:
                     <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px; margin-bottom: 20px;">
                         <h1>🏗️ 3D Floor Plan Converter</h1>
                         <p style="font-size: 1.1em; margin-top: 10px;">
-                            Transform 2D vector floor plans into interactive 3D models
+                            Transform 2D floor plans into interactive 3D models with room details
                         </p>
                     </div>
                     """
@@ -181,10 +255,24 @@ def create_interface() -> gr.Blocks:
         with gr.Row():
             # Left column: Input controls
             with gr.Column(scale=1):
+                gr.Markdown("### 📋 Quick Templates")
+                
+                # Template buttons
+                with gr.Row():
+                    btn_1bhk = gr.Button("1 BHK", scale=1, variant="secondary", size="sm")
+                    btn_2bhk = gr.Button("2 BHK", scale=1, variant="secondary", size="sm")
+                
+                with gr.Row():
+                    btn_3bhk = gr.Button("3 BHK", scale=1, variant="secondary", size="sm")
+                    btn_villa = gr.Button("Villa", scale=1, variant="secondary", size="sm")
+                
+                with gr.Row():
+                    btn_penthouse = gr.Button("Penthouse", scale=1, variant="secondary", size="sm")
+                
+                gr.Markdown("---")
                 gr.Markdown("### 📥 Upload Floor Plan")
                 gr.Markdown(
-                    "Upload a JSON file containing wall coordinates. "
-                    "Don't have one? Download a sample below!"
+                    "Upload a custom JSON file or use templates above."
                 )
                 
                 # File uploader
@@ -220,7 +308,7 @@ def create_interface() -> gr.Blocks:
                     interactive=False
                 )
             
-            # Right column: 3D viewer
+            # Right column: 3D viewer and room details
             with gr.Column(scale=2):
                 gr.Markdown("### 🎨 3D Preview")
                 model_output = gr.Model3D(
@@ -228,18 +316,39 @@ def create_interface() -> gr.Blocks:
                     height=500,
                     clear_color=[0.95, 0.95, 0.95, 1.0]
                 )
+                
+                gr.Markdown("### 📐 Room Analysis")
+                room_details_output = gr.Textbox(
+                    label="Room Details",
+                    placeholder="Room information will appear here...",
+                    lines=8,
+                    interactive=False,
+                    show_label=True
+                )
         
         # Instructions section
         with gr.Row():
             with gr.Column():
                 gr.Markdown(
                     """
-                    ### 📋 Input Format
+                    ### 📋 JSON Format Guide
                     
-                    Your JSON file should follow this structure:
+                    Your custom JSON should follow this structure:
                     
                     ```json
 {
+  "name": "Floor Plan Name",
+  "description": "Optional description",
+  "total_area": 850,
+  "rooms": {
+    "hall": {
+      "name": "Living Room",
+      "type": "living_room",
+      "dimensions": [5.0, 4.5],
+      "area": 22.5,
+      "position": [0, 0]
+    }
+  },
   "walls": [
     [[x1, y1], [x2, y2]],
     [[x3, y3], [x4, y4]]
@@ -247,19 +356,29 @@ def create_interface() -> gr.Blocks:
 }
                     ```
                     
-                    *Each wall is defined by two coordinate pairs representing start and end points.*
+                    **Room Types**: bedroom, kitchen, toilet, hall, balcony, dining, office, garage, patio, garden, etc.
                     """
                 )
         
+        # Hidden file to store template data
+        template_file = gr.File(visible=False)
+        
         # Event handlers
+        
+        # Template buttons
+        def load_template(template_name: str) -> Tuple[str, str]:
+            file_path, status = generate_template_json(template_name)
+            return file_path, status
+        
+        btn_1bhk.click(fn=lambda: load_template("1bhk"), outputs=[file_input, status_output])
+        btn_2bhk.click(fn=lambda: load_template("2bhk"), outputs=[file_input, status_output])
+        btn_3bhk.click(fn=lambda: load_template("3bhk"), outputs=[file_input, status_output])
+        btn_villa.click(fn=lambda: load_template("villa"), outputs=[file_input, status_output])
+        btn_penthouse.click(fn=lambda: load_template("penthouse"), outputs=[file_input, status_output])
         
         # Sample file generation
         sample_button.click(
             fn=generate_sample_json,
-            inputs=None,
-            outputs=sample_file_output
-        ).then(
-            fn=lambda: gr.File(visible=True),
             inputs=None,
             outputs=sample_file_output
         )
@@ -268,7 +387,7 @@ def create_interface() -> gr.Blocks:
         process_button.click(
             fn=process_floor_plan,
             inputs=file_input,
-            outputs=[model_output, status_output]
+            outputs=[model_output, status_output, room_details_output]
         )
     
     return interface
