@@ -1,0 +1,12 @@
+kaggle
+jupyter
+pandas
+numpy
+matplotlib
+opencv-python
+seaborn
+networkx
+shapely
+ipykernel
+gradio
+scikit-learn
