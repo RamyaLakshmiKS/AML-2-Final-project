@@ -1,12 +1,26 @@
+# Core Dependencies for 3D Floor Plan Converter
+# Python 3.10+ required
+
+# 3D Geometry and Mesh Processing
+trimesh>=4.0.0          # 3D mesh creation and manipulation
+mapbox-earcut>=2.0.0    # Fast polygon triangulation engine (required by trimesh)
+shapely>=2.0.0          # 2D geometry operations and polygon manipulation
+numpy>=1.24.0           # Numerical computing foundation
+
+# Web Interface
+gradio>=4.0.0           # Interactive web UI framework
+
+# Additional scientific computing (existing dependencies)
 kaggle
 jupyter
 pandas
-numpy
 matplotlib
 opencv-python
 seaborn
 networkx
-shapely
 ipykernel
-gradio
 scikit-learn
+
+# Optional: Enhanced 3D export capabilities
+# pyglet>=2.0.0         # For rendering previews (optional)
+# pillow>=10.0.0        # Image processing for textures (optional)
