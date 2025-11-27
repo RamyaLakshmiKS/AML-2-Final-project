@@ -19,7 +19,6 @@ import gradio as gr
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../src'))
 
 from builder import HouseBuilder
-from floor_plan_generator import create_floor_plan
 
 
 # Sample floor plan data for demonstration purposes
@@ -72,9 +71,27 @@ def generate_template_json(template: str) -> Tuple[str, str]:
     Returns:
         Tuple of (file_path, status_message)
     """
+    # Load template from examples directory
+    template_map = {
+        "1bhk": "apartment_1bhk.json",
+        "2bhk": "apartment_2bhk.json",
+        "3bhk": "apartment_3bhk.json",
+        "villa": "house_villa.json",
+        "penthouse": "apartment_3bhk.json"  # Using 3bhk as fallback
+    }
+    
     try:
-        # Create floor plan from template
-        floor_plan = create_floor_plan(template)
+        # Get the template filename
+        template_filename = template_map.get(template.lower(), "apartment_2bhk.json")
+        template_path = os.path.join(
+            os.path.dirname(__file__),
+            "../examples",
+            template_filename
+        )
+        
+        # Load the template file
+        with open(template_path, 'r') as f:
+            floor_plan = json.load(f)
         
         # Create temporary file
         temp_file = tempfile.NamedTemporaryFile(
@@ -87,21 +104,27 @@ def generate_template_json(template: str) -> Tuple[str, str]:
         json.dump(floor_plan, temp_file, indent=2)
         temp_file.close()
         
+        plan_name = floor_plan.get('name', template)
+        total_area = floor_plan.get('total_area', 0)
+        room_count = len(floor_plan.get('rooms', {}))
+        
         status_msg = (
-            f"✅ Generated {floor_plan['name']}\n"
-            f"📐 Total Area: {floor_plan['total_area']:.2f} sq.m\n"
-            f"🏠 Rooms: {len(floor_plan['rooms'])}"
+            f"✅ Loaded {plan_name}\n"
+            f"📐 Total Area: {total_area:.2f} sq.m\n"
+            f"🏠 Rooms: {room_count}"
         )
         
         return temp_file.name, status_msg
         
     except Exception as e:
-        raise gr.Error(f"Error generating template: {str(e)}")
+        raise gr.Error(f"Error loading template: {str(e)}. Please check that example files exist.")
 
 
-def process_floor_plan(uploaded_file: Optional[gr.File]) -> Tuple[Optional[str], str, str]:
+def process_floor_plan(uploaded_file: Optional[gr.File], custom_bedroom_color: Optional[str] = None, 
+                       custom_bathroom_color: Optional[str] = None, custom_kitchen_color: Optional[str] = None,
+                       custom_livingroom_color: Optional[str] = None) -> Tuple[Optional[str], str, str]:
     """
-    Process an uploaded JSON floor plan and generate a 3D model.
+    Process an uploaded JSON floor plan and generate a 3D model with optional room colors.
     
     This function serves as the main processing pipeline for the Gradio interface.
     It validates the input, invokes the HouseBuilder, and returns the 3D model
@@ -109,6 +132,10 @@ def process_floor_plan(uploaded_file: Optional[gr.File]) -> Tuple[Optional[str],
     
     Args:
         uploaded_file: A Gradio File object containing the uploaded JSON
+        custom_bedroom_color: Hex color for bedrooms (e.g., "#FF8080")
+        custom_bathroom_color: Hex color for bathrooms
+        custom_kitchen_color: Hex color for kitchens
+        custom_livingroom_color: Hex color for living rooms
         
     Returns:
         A tuple of (glb_file_path, status_message, room_details)
@@ -143,15 +170,39 @@ def process_floor_plan(uploaded_file: Optional[gr.File]) -> Tuple[Optional[str],
                 "Please provide at least one wall."
             )
         
-        # Initialize the builder
+        # Build custom colors dictionary if provided
+        custom_colors = {}
+        def hex_to_rgb(hex_color: str) -> Tuple[float, float, float]:
+            """Convert hex color to RGB tuple (0-1 range)."""
+            if not hex_color:
+                return None
+            hex_color = hex_color.lstrip('#')
+            return tuple(int(hex_color[i:i+2], 16) / 255.0 for i in (0, 2, 4))
+        
+        if custom_bedroom_color:
+            custom_colors["bedroom"] = hex_to_rgb(custom_bedroom_color)
+            custom_colors["master_bedroom"] = hex_to_rgb(custom_bedroom_color)
+        
+        if custom_bathroom_color:
+            custom_colors["bathroom"] = hex_to_rgb(custom_bathroom_color)
+            custom_colors["toilet"] = hex_to_rgb(custom_bathroom_color)
+        
+        if custom_kitchen_color:
+            custom_colors["kitchen"] = hex_to_rgb(custom_kitchen_color)
+        
+        if custom_livingroom_color:
+            custom_colors["living_room"] = hex_to_rgb(custom_livingroom_color)
+        
+        # Initialize the builder with custom colors
         builder = HouseBuilder(
             wall_thickness=0.1,
             wall_height=2.5,
-            floor_offset=-0.05
+            floor_offset=-0.05,
+            custom_colors=custom_colors if custom_colors else None
         )
         
         # Process the floor plan
-        scene = builder.process_floorplan(json_data)
+        scene = builder.process_floorplan(json_data, use_room_colors=True)
         
         # Export to a temporary GLB file
         output_file = tempfile.NamedTemporaryFile(
@@ -173,6 +224,7 @@ def process_floor_plan(uploaded_file: Optional[gr.File]) -> Tuple[Optional[str],
             f"✅ Successfully generated 3D model!\n"
             f"📋 Plan: {plan_name}\n"
             f"📊 Processed {wall_count} wall{'s' if wall_count != 1 else ''}\n"
+            f"🎨 Room-based coloring applied\n"
             f"📦 Output format: GLB (compatible with all 3D viewers)"
         )
         
@@ -191,7 +243,13 @@ def process_floor_plan(uploaded_file: Optional[gr.File]) -> Tuple[Optional[str],
                 room_type = room_info.get("type", "")
                 dimensions = room_info.get("dimensions", [0, 0])
                 
-                room_details += f"🏠 {name}\n"
+                # Get color for this room type
+                color = builder.get_color_for_room_type(room_type) if room_type else None
+                color_hex = ""
+                if color:
+                    color_hex = f" [Color: #{int(color[0]*255):02x}{int(color[1]*255):02x}{int(color[2]*255):02x}]"
+                
+                room_details += f"🏠 {name}{color_hex}\n"
                 if room_type:
                     room_details += f"   Type: {room_type}\n"
                 room_details += f"   Dimensions: {dimensions[0]:.2f}m × {dimensions[1]:.2f}m\n"
@@ -270,7 +328,40 @@ def create_interface() -> gr.Blocks:
                     btn_penthouse = gr.Button("Penthouse", scale=1, variant="secondary", size="sm")
                 
                 gr.Markdown("---")
-                gr.Markdown("### 📥 Upload Floor Plan")
+                gr.Markdown("### 🎨 Room Colors")
+                gr.Markdown(
+                    "Customize colors for different room types"
+                )
+                
+                color_bedroom = gr.Textbox(
+                    label="Bedroom Color",
+                    placeholder="#FF8080",
+                    value="#FF8080",
+                    info="Hex color code (e.g., #FF8080)"
+                )
+                
+                color_bathroom = gr.Textbox(
+                    label="Bathroom Color",
+                    placeholder="#70E8FF",
+                    value="#70E8FF",
+                    info="Hex color code (e.g., #70E8FF)"
+                )
+                
+                color_kitchen = gr.Textbox(
+                    label="Kitchen Color",
+                    placeholder="#FFFF70",
+                    value="#FFFF70",
+                    info="Hex color code (e.g., #FFFF70)"
+                )
+                
+                color_livingroom = gr.Textbox(
+                    label="Living Room Color",
+                    placeholder="#D9FFD9",
+                    value="#D9FFD9",
+                    info="Hex color code (e.g., #D9FFD9)"
+                )
+                
+                gr.Markdown("---")
                 gr.Markdown(
                     "Upload a custom JSON file or use templates above."
                 )
@@ -386,7 +477,7 @@ def create_interface() -> gr.Blocks:
         # Main processing pipeline
         process_button.click(
             fn=process_floor_plan,
-            inputs=file_input,
+            inputs=[file_input, color_bedroom, color_bathroom, color_kitchen, color_livingroom],
             outputs=[model_output, status_output, room_details_output]
         )
     
