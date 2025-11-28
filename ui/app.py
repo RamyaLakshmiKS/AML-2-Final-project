@@ -4,8 +4,6 @@
 This module provides a Gradio-based web interface for converting 2D floor plans
 (JSON format) into interactive 3D models (GLB format).
 
-Author: Senior Python Engineer
-Purpose: User-friendly interface for the HouseBuilder engine
 """
 
 import json
