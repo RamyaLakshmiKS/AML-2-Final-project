@@ -7,20 +7,33 @@ mapbox-earcut>=2.0.0    # Fast polygon triangulation engine (required by trimesh
 shapely>=2.0.0          # 2D geometry operations and polygon manipulation
 numpy>=1.24.0           # Numerical computing foundation
 
-# Web Interface
+# Web Interface & Interactive Notebooks
 gradio>=4.0.0           # Interactive web UI framework
+jupyter>=1.0.0          # Jupyter notebook runtime
+ipykernel>=6.25.0       # IPython kernel for Jupyter
+ipywidgets>=8.0.0       # Interactive widgets for notebooks
 
-# Additional scientific computing (existing dependencies)
-kaggle
-jupyter
-pandas
-matplotlib
-opencv-python
-seaborn
-networkx
-ipykernel
-scikit-learn
+# Data Processing & Analysis
+pandas>=2.0.0           # Data manipulation and analysis
+kaggle>=1.5.12          # Kaggle API for dataset access
 
-# Optional: Enhanced 3D export capabilities
-# pyglet>=2.0.0         # For rendering previews (optional)
-# pillow>=10.0.0        # Image processing for textures (optional)
+# Data Science & ML
+scikit-learn>=1.3.0     # Machine learning algorithms
+scipy>=1.11.0           # Scientific computing utilities
+
+# Visualization
+matplotlib>=3.7.0       # Static plotting library
+seaborn>=0.12.0         # Statistical data visualization
+opencv-python>=4.8.0    # Computer vision library
+plotly>=5.17.0          # Interactive plotting library
+
+# Utilities
+networkx>=3.1           # Network/graph algorithms
+python-dotenv>=1.0.0    # Environment variable management
+Pillow>=10.0.0          # Image processing
+
+# Development & Code Quality
+pytest>=7.4.0           # Testing framework
+black>=23.0.0           # Code formatter
+flake8>=6.0.0           # Linting tool
+mypy>=1.4.0             # Static type checker
