@@ -324,12 +324,7 @@ def create_interface() -> gr.Blocks:
     """
     
     interface = gr.Blocks(
-        title="3D Floor Plan Converter v2",
-        theme=gr.themes.Soft(
-            primary_hue="indigo",
-            secondary_hue="blue",
-            neutral_hue="slate"
-        )
+        title="3D Floor Plan Converter v2"
     )
     
     with interface:
@@ -425,12 +420,6 @@ def create_interface() -> gr.Blocks:
                         variant="secondary",
                         scale=1
                     )
-                    
-                    btn_guide = gr.Button(
-                        "📖 View Format Guide",
-                        variant="secondary",
-                        scale=1
-                    )
                 
                 sample_file_output = gr.File(
                     label="Sample File",
@@ -452,8 +441,7 @@ def create_interface() -> gr.Blocks:
                     label="Processing Status",
                     placeholder="Upload a file and click 'Generate' to start...",
                     lines=4,
-                    interactive=False,
-                    show_copy_button=True
+                    interactive=False
                 )
             
             # Right column: 3D viewer and analysis
@@ -473,9 +461,8 @@ def create_interface() -> gr.Blocks:
                         room_details_output = gr.Textbox(
                             label="Room Details",
                             placeholder="Room information will appear here...",
-                            lines=16,
-                            interactive=False,
-                            show_copy_button=True
+                            lines=30,
+                            interactive=False
                         )
                     
                     with gr.TabItem("ℹ️ Model Info", id="info"):
@@ -483,73 +470,9 @@ def create_interface() -> gr.Blocks:
                         info_output = gr.Textbox(
                             label="Model Information",
                             placeholder="Technical details will appear here...",
-                            lines=16,
-                            interactive=False,
-                            show_copy_button=True
+                            lines=30,
+                            interactive=False
                         )
-        
-        # Instructions section - improved layout
-        with gr.Row():
-            with gr.Column():
-                gr.Markdown(
-                    """
-                    ### 📋 JSON Format Guide
-                    
-                    Your custom JSON should follow this structure:
-                    
-                    ```json
-{
-  "name": "Floor Plan Name",
-  "description": "Optional description",
-  "total_area": 850,
-  "rooms": {
-    "hall": {
-      "name": "Living Room",
-      "type": "living_room",
-      "dimensions": [5.0, 4.5],
-      "area": 22.5,
-      "position": [0, 0]
-    }
-  },
-  "walls": [
-    [[x1, y1], [x2, y2]],
-    [[x3, y3], [x4, y4]]
-  ]
-}
-                    ```
-                    
-                    **Room Types**: bedroom, kitchen, toilet, hall, balcony, dining, office, garage, patio, garden, etc.
-                    """
-                )
-            with gr.Column():
-                gr.Markdown(
-                    """
-                    ### ⚡ Quick Tips
-                    
-                    **Getting Started:**
-                    1. Click a template button to load a sample
-                    2. Customize room colors if desired
-                    3. Click "Generate 3D Model"
-                    4. View in the 3D Preview tab
-                    
-                    **For Custom Files:**
-                    - Ensure valid JSON format
-                    - Include "walls" array (required)
-                    - Add "rooms" for color mapping (optional)
-                    - Use consistent coordinate units
-                    
-                    **Tips:**
-                    - Wall thickness: 0.1 units (auto-set)
-                    - Wall height: 2.5 units (standard)
-                    - Coordinates: [[x1,y1],[x2,y2]] format
-                    - Colors: Hex format (#RRGGBB)
-                    
-                    **Output:**
-                    - GLB format (universal 3D)
-                    - Compatible with all 3D viewers
-                    - Ready for further processing
-                    """
-                )
         
         # Hidden file to store template data
         template_file = gr.File(visible=False)

@@ -276,7 +276,8 @@ class HouseBuilder:
         
         Args:
             json_data: A dictionary containing "walls" key with list of wall coordinates
-                      Format: {"walls": [[[x1, y1], [x2, y2]], ...], "rooms": {...}}
+                      Format: {"walls": [[label, coords], ...] or {"walls": [coords, ...]}, "rooms": {...}}
+                      where coords is [[x1,y1], [x2,y2], ...] for polygons or lines
             use_room_colors: If True, apply colors based on room types (default: True)
         
         Returns:
@@ -308,21 +309,37 @@ class HouseBuilder:
         if use_room_colors and "room_walls" in json_data:
             room_wall_mapping = json_data["room_walls"]
         
-        for idx, wall_coords in enumerate(walls_data):
+        for idx, wall_data in enumerate(walls_data):
             try:
-                # Create buffered polygon for this wall
-                wall_polygon = self._create_wall_polygon(wall_coords)
-                wall_polygons.append(wall_polygon)
+                # Extract wall coordinates (handle both [label, coords] and direct coords formats)
+                if isinstance(wall_data, list) and len(wall_data) == 2 and isinstance(wall_data[0], str):
+                    # Format: [label, coords]
+                    wall_coords = wall_data[1]
+                else:
+                    # Direct coords format
+                    wall_coords = wall_data
                 
                 # Determine color for this wall based on room assignment
                 wall_color = None
                 if use_room_colors:
                     wall_color = self._get_wall_color(idx, room_wall_mapping)
                 
-                # Extrude the polygon into a 3D mesh with color
-                wall_mesh = self._extrude_wall(wall_polygon, wall_color)
-                wall_meshes.append(wall_mesh)
-                wall_colors.append(wall_color)
+                if len(wall_coords) == 2:
+                    # Single wall segment
+                    wall_polygon = self._create_wall_polygon(wall_coords)
+                    wall_polygons.append(wall_polygon)
+                    wall_mesh = self._extrude_wall(wall_polygon, wall_color)
+                    wall_meshes.append(wall_mesh)
+                    wall_colors.append(wall_color)
+                else:
+                    # Multiple segments for closed polygon (e.g., outer perimeter)
+                    for i in range(len(wall_coords) - 1):
+                        segment_coords = [wall_coords[i], wall_coords[i+1]]
+                        wall_polygon = self._create_wall_polygon(segment_coords)
+                        wall_polygons.append(wall_polygon)
+                        wall_mesh = self._extrude_wall(wall_polygon, wall_color)
+                        wall_meshes.append(wall_mesh)
+                        wall_colors.append(wall_color)
                 
             except Exception as e:
                 raise Exception(
