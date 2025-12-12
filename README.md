@@ -1043,8 +1043,8 @@ flake8 src/ ui/ tests/
 If you use this system in academic work, please cite:
 
 ```bibtex
-@inproceedings{kuppasundarajan2024floorplan,
-  title={Intelligent 3D Floor Plan Generation System: A Computational Geometry Approach with Room-Based Visualization},
+@inproceedings{kuppasundarajan2025floorplan,
+  title={3D Floor Plan Generation System: A Computational Geometry Approach with Room-Based Visualization},
   author={Kuppa Sundararajan, Ramya Lakshmi},
   booktitle={Applied Machine Learning II},
   year={2025},
