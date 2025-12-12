@@ -107,9 +107,9 @@ def generate_template_json(template: str) -> Tuple[str, str]:
         room_count = len(floor_plan.get('rooms', {}))
         
         status_msg = (
-            f"✅ Loaded {plan_name}\n"
-            f"📐 Total Area: {total_area:.2f} sq.m\n"
-            f"🏠 Rooms: {room_count}"
+            f" Loaded {plan_name}\n"
+            f" Total Area: {total_area:.2f} sq.m\n"
+            f" Rooms: {room_count}"
         )
         
         return temp_file.name, status_msg
@@ -219,20 +219,20 @@ def process_floor_plan(uploaded_file: Optional[gr.File], custom_bedroom_color: O
         total_area = json_data.get("total_area", 0)
         
         status_message = (
-            f"✅ Successfully generated 3D model!\n"
-            f"📋 Plan: {plan_name}\n"
-            f"📊 Processed {wall_count} wall{'s' if wall_count != 1 else ''}\n"
-            f"🎨 Room-based coloring applied\n"
-            f"📦 Output format: GLB (compatible with all 3D viewers)"
+            f" Successfully generated 3D model!\n"
+            f" Plan: {plan_name}\n"
+            f" Processed {wall_count} wall{'s' if wall_count != 1 else ''}\n"
+            f" Room-based coloring applied\n"
+            f" Output format: GLB (compatible with all 3D viewers)"
         )
         
         if plan_desc:
-            status_message += f"\n📝 {plan_desc}"
+            status_message += f"\n {plan_desc}"
         
         # Generate room details
         room_details = ""
         if "rooms" in json_data:
-            room_details = "📐 Room Details:\n" + "-" * 35 + "\n\n"
+            room_details = " Room Details:\n" + "-" * 35 + "\n\n"
             total_room_area = 0
             
             for room_id, room_info in json_data["rooms"].items():
@@ -247,7 +247,7 @@ def process_floor_plan(uploaded_file: Optional[gr.File], custom_bedroom_color: O
                 if color:
                     color_hex = f" [Color: #{int(color[0]*255):02x}{int(color[1]*255):02x}{int(color[2]*255):02x}]"
                 
-                room_details += f"🏠 {name}{color_hex}\n"
+                room_details += f" {name}{color_hex}\n"
                 if room_type:
                     room_details += f"   Type: {room_type}\n"
                 room_details += f"   Dimensions: {dimensions[0]:.2f}m × {dimensions[1]:.2f}m\n"
@@ -258,11 +258,11 @@ def process_floor_plan(uploaded_file: Optional[gr.File], custom_bedroom_color: O
             room_details += f"Total Room Area: {total_room_area:.2f} sq.m"
         
         if total_area > 0:
-            room_details += f"\n\n📏 Total Plan Area: {total_area:.2f} sq.m"
+            room_details += f"\n\n Total Plan Area: {total_area:.2f} sq.m"
         
         # Generate model information
         model_info = (
-            f"📊 Model Information\n"
+            f" Model Information\n"
             f"{'='*40}\n\n"
             f"Processing Summary:\n"
             f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -277,14 +277,14 @@ def process_floor_plan(uploaded_file: Optional[gr.File], custom_bedroom_color: O
             f"Floor Offset: -0.05 units\n\n"
             f"Color Rendering:\n"
             f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"Status: ✅ Enabled\n"
+            f"Status:  Enabled\n"
             f"Method: Room-type based\n"
             f"Color Scheme: Enhanced palette\n\n"
             f"Export Details:\n"
             f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             f"File: {output_file.name}\n"
             f"Size: {output_file.name}\n"
-            f"Status: ✅ Ready for download"
+            f"Status:  Ready for download"
         )
         
         return output_file.name, status_message, room_details, model_info
@@ -350,45 +350,45 @@ def create_interface() -> gr.Blocks:
         with gr.Row(equal_height=False):
             # Left column: Input controls
             with gr.Column(scale=1, min_width=350):
-                gr.Markdown("### 📋 Quick Templates")
+                gr.Markdown("###  Quick Templates")
                 gr.Markdown("_Select a pre-built template to get started instantly_")
                 
                 # Template buttons with better organization
                 with gr.Group():
                     with gr.Row():
-                        btn_1bhk = gr.Button("🏠 1 BHK", scale=1, variant="secondary", size="md")
-                        btn_2bhk = gr.Button("🏘️ 2 BHK", scale=1, variant="secondary", size="md")
+                        btn_1bhk = gr.Button(" 1 BHK", scale=1, variant="secondary", size="md")
+                        btn_2bhk = gr.Button(" 2 BHK", scale=1, variant="secondary", size="md")
                     
                     with gr.Row():
-                        btn_3bhk = gr.Button("🏢 3 BHK", scale=1, variant="secondary", size="md")
-                        btn_villa = gr.Button("🏰 Villa", scale=1, variant="secondary", size="md")
+                        btn_3bhk = gr.Button(" 3 BHK", scale=1, variant="secondary", size="md")
+                        btn_villa = gr.Button(" Villa", scale=1, variant="secondary", size="md")
                     
                     with gr.Row():
-                        btn_penthouse = gr.Button("🌆 Penthouse", scale=1, variant="secondary", size="md")
+                        btn_penthouse = gr.Button(" Penthouse", scale=1, variant="secondary", size="md")
                 
                 gr.Markdown("---")
                 
                 # Enhanced color customization with better UX
-                gr.Markdown("### 🎨 Customize Room Colors")
+                gr.Markdown("###  Customize Room Colors")
                 gr.Markdown("_Personalize the appearance of different room types_")
                 
                 with gr.Group():
                     color_bedroom = gr.Textbox(
-                        label="🛏️ Bedroom Color",
+                        label=" Bedroom Color",
                         placeholder="#FF8080",
                         value="#FF8080",
                         info="Hex color code (e.g., #FF8080)"
                     )
                     
                     color_bathroom = gr.Textbox(
-                        label="🚿 Bathroom Color",
+                        label=" Bathroom Color",
                         placeholder="#70E8FF",
                         value="#70E8FF",
                         info="Hex color code"
                     )
                     
                     color_kitchen = gr.Textbox(
-                        label="🍳 Kitchen Color",
+                        label=" Kitchen Color",
                         placeholder="#FFFF70",
                         value="#FFFF70",
                         info="Hex color code"
@@ -404,7 +404,7 @@ def create_interface() -> gr.Blocks:
                 gr.Markdown("---")
                 
                 # File upload section with instructions
-                gr.Markdown("### 📤 Upload Custom Floor Plan")
+                gr.Markdown("###  Upload Custom Floor Plan")
                 gr.Markdown("_Or upload your own JSON file_")
                 
                 file_input = gr.File(
@@ -416,7 +416,7 @@ def create_interface() -> gr.Blocks:
                 # Sample file download button
                 with gr.Row():
                     sample_button = gr.Button(
-                        "📄 Download Sample",
+                        " Download Sample",
                         variant="secondary",
                         scale=1
                     )

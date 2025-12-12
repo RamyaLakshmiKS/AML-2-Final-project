@@ -1,4 +1,4 @@
-# 🏗️ 3D Floor Plan Converter - Production Edition v2.0
+# 🏗️ 3D Floor Plan Converter 
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -19,6 +19,7 @@ A **production-ready web application** that transforms 2D vector floor plans (JS
 - [Performance Metrics](#performance-metrics)
 - [JSON Format Specification](#json-format-specification)
 - [API Reference](#api-reference)
+- [Documentation](#documentation)
 - [Known Issues & Limitations](#known-issues--limitations)
 - [Troubleshooting](#troubleshooting)
 - [Architecture & Design](#architecture--design)
@@ -499,6 +500,148 @@ print(summary)
 
 ---
 
+## Documentation
+
+### 📁 Project Structure
+
+```
+AML-2-Final-project/
+├── README.md                      # This file - project overview
+├── requirements.txt               # Python dependencies
+├── LICENSE                        # MIT License
+│
+├── src/                          # Core source code
+│   ├── builder.py                # Main geometry engine (467 lines)
+│   └── quickstart.py             # Example usage script
+│
+├── ui/                           # Web application
+│   └── app.py                    # Gradio-based interface (528 lines)
+│
+├── tests/                        # Test suite
+│   └── test_builder.py           # Unit & integration tests (107 lines)
+│
+├── examples/                     # Sample floor plans (JSON)
+│   ├── apartment_1bhk.json
+│   ├── apartment_2bhk.json
+│   ├── apartment_3bhk.json
+│   ├── house_villa.json
+│   ├── l_shaped_house.json
+│   └── complex_hallway.json
+│
+├── docs/                         # Documentation
+│   ├── IEEE_Final_Report.tex    # 12-page research paper
+│   ├── SYSTEM_ARCHITECTURE.md   # Technical architecture
+│   ├── USAGE_GUIDE.md           # User tutorials
+│   ├── generate_figures.py      # Figure generation script
+│   └── figures/                 # Generated charts
+│       ├── performance_analysis.png
+│       ├── accuracy_validation.png
+│       ├── architecture_diagram.png
+│       └── ...
+│
+├── models/                       # Generated 3D models (output)
+├── results/                      # Analysis results
+├── notebooks/                    # Jupyter notebooks
+│   ├── eda.ipynb                # Exploratory data analysis
+│   └── refined_analysis.ipynb   # Performance analysis
+│
+└── aml2/                        # Virtual environment
+```
+
+### 📚 Available Documentation
+
+This project includes comprehensive documentation covering all aspects of the system:
+
+#### IEEE Conference Paper
+- **[IEEE_Final_Report.tex](docs/IEEE_Final_Report.tex)** - Complete 12-page IEEE-style research paper
+  - Full system architecture and implementation details
+  - Performance evaluation and results
+  - Related work and contributions
+  - Responsible AI considerations
+  - 15+ academic references
+  - **Compile to PDF**: Use LaTeX or upload to [Overleaf](https://www.overleaf.com/)
+
+#### Technical Documentation
+- **[SYSTEM_ARCHITECTURE.md](docs/SYSTEM_ARCHITECTURE.md)** - Detailed system architecture
+  - Complete data & processing pipeline
+  - Component interaction diagrams
+  - Geometric transformation algorithms
+  - Performance characteristics
+  
+- **[USAGE_GUIDE.md](docs/USAGE_GUIDE.md)** - Comprehensive usage guide
+  - Step-by-step tutorials
+  - API examples
+  - Command-line usage
+  - Advanced customization
+
+#### Figures and Visualizations
+- **[generate_figures.py](docs/generate_figures.py)** - Automated figure generation
+  - Performance analysis charts
+  - Accuracy validation plots
+  - System architecture diagrams
+  - Test coverage visualizations
+  - **Generate all figures**: `cd docs && python generate_figures.py`
+  - Outputs to `docs/figures/` directory
+
+### 🚀 Quick Start for Documentation
+
+**To view the IEEE paper:**
+```bash
+# Option 1: Use Overleaf (recommended - no installation)
+# 1. Go to https://www.overleaf.com/
+# 2. Upload docs/IEEE_Final_Report.tex
+# 3. View auto-compiled PDF
+
+# Option 2: Compile locally (requires LaTeX)
+cd docs
+pdflatex IEEE_Final_Report.tex
+bibtex IEEE_Final_Report
+pdflatex IEEE_Final_Report.tex
+pdflatex IEEE_Final_Report.tex
+# Output: IEEE_Final_Report.pdf
+```
+
+**To generate figures:**
+```bash
+cd docs
+python generate_figures.py
+# Creates 6 publication-quality figures in docs/figures/
+```
+
+**To read architecture details:**
+```bash
+# Open in any markdown viewer or GitHub
+cat docs/SYSTEM_ARCHITECTURE.md
+```
+
+#### Example Floor Plans
+Located in `examples/` directory:
+- `apartment_1bhk.json` - Single bedroom apartment
+- `apartment_2bhk.json` - Two bedroom apartment  
+- `apartment_3bhk.json` - Three bedroom apartment
+- `house_villa.json` - Large villa layout
+- `l_shaped_house.json` - L-shaped house design
+- `complex_hallway.json` - Complex corridor system
+
+### 📖 Reading the Documentation
+
+**For Users:**
+1. Start with this README for overview
+2. Check [USAGE_GUIDE.md](docs/USAGE_GUIDE.md) for detailed tutorials
+3. Explore example JSON files in `examples/`
+
+**For Developers:**
+1. Read [SYSTEM_ARCHITECTURE.md](docs/SYSTEM_ARCHITECTURE.md) for technical details
+2. Review source code in `src/builder.py`
+3. Check test cases in `tests/test_builder.py`
+
+**For Researchers:**
+1. Read the [IEEE Final Report](docs/IEEE_Final_Report.tex)
+2. Generate figures: `cd docs && python generate_figures.py`
+3. Compile LaTeX or view on Overleaf
+
+---
+
 ## Known Issues & Limitations
 
 ### Current Limitations
@@ -875,7 +1018,24 @@ RoomColorManager
 - **Processing Speed**: ~0.3ms per wall (linear scaling)
 - **Memory Usage**: ~50-100 MB per standard floor plan
 
-For detailed performance analysis and optimization opportunities, see [docs/SYSTEM_ARCHITECTURE.md](docs/SYSTEM_ARCHITECTURE.md).
+### Actual Performance Results
+
+Based on comprehensive testing documented in the IEEE Final Report:
+
+| Floor Plan Type | Walls | Rooms | Processing Time | File Size |
+|-----------------|-------|-------|-----------------|-----------|
+| Simple Test | 5 | 2 | 3.2 ms | 12.4 KB |
+| 1 BHK Apartment | 12 | 4 | 4.1 ms | 18.7 KB |
+| 2 BHK Apartment | 18 | 7 | 4.6 ms | 24.3 KB |
+| 3 BHK Apartment | 24 | 9 | 5.8 ms | 31.5 KB |
+| Villa (Complex) | 35 | 12 | 7.3 ms | 42.8 KB |
+
+**Geometric Accuracy:**
+- Wall dimensions: < 0.04% error
+- Room areas: < 0.13% error
+- All measurements within 0.2% tolerance
+
+For detailed performance analysis and optimization opportunities, see [docs/IEEE_Final_Report.tex](docs/IEEE_Final_Report.tex) Section IV.
 
 ### Key Design Principles
 
@@ -922,19 +1082,8 @@ flake8 src/ ui/ tests/
 
 ---
 
-## License
-
-This project is licensed under the **MIT License** - see LICENSE file for details.
-
----
-
 ## Contact & Support
 
-### Project Information
-
-**Current Version:** 2.0 (Production)  
-**Last Updated:** November 29, 2025  
-**Development Status:** Active Maintenance
 
 ### Developer Contact
 
@@ -952,10 +1101,25 @@ This project is licensed under the **MIT License** - see LICENSE file for detail
 
 ### Resources
 
-- 📖 **[Technical Documentation](docs/ARCHITECTURE.md)** - System design & implementation
-- 📚 **[Usage Guide](docs/USAGE_GUIDE.md)** - Detailed usage examples
-- 🎨 **[Project README](docs/PROJECT_README.md)** - Project overview
-- 📊 **[Workflow Diagrams](docs/WORKFLOW_DIAGRAMS.md)** - Visual workflows
+- 📚 **[System Architecture](docs/SYSTEM_ARCHITECTURE.md)** - Technical architecture details
+- 📘 **[Usage Guide](docs/USAGE_GUIDE.md)** - Comprehensive tutorials
+- 📊 **[Performance Figures](docs/figures/)** - Generated charts and diagrams
+- 🔧 **[Figure Generator](docs/generate_figures.py)** - Automated visualization tool
+- 💡 **[Example Floor Plans](examples/)** - Sample JSON files
+
+### Academic Citation
+
+If you use this system in academic work, please cite:
+
+```bibtex
+@inproceedings{kuppasundarajan2024floorplan,
+  title={Intelligent 3D Floor Plan Generation System: A Computational Geometry Approach with Room-Based Visualization},
+  author={Kuppa Sundararajan, Ramya Lakshmi},
+  booktitle={Applied Machine Learning II},
+  year={2025},
+  organization={University of Florida}
+}
+```
 
 ---
 
