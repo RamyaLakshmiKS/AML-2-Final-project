@@ -552,15 +552,6 @@ AML-2-Final-project/
 
 This project includes comprehensive documentation covering all aspects of the system:
 
-#### IEEE Conference Paper
-- **[IEEE_Final_Report.tex](docs/IEEE_Final_Report.tex)** - Complete 12-page IEEE-style research paper
-  - Full system architecture and implementation details
-  - Performance evaluation and results
-  - Related work and contributions
-  - Responsible AI considerations
-  - 15+ academic references
-  - **Compile to PDF**: Use LaTeX or upload to [Overleaf](https://www.overleaf.com/)
-
 #### Technical Documentation
 - **[SYSTEM_ARCHITECTURE.md](docs/SYSTEM_ARCHITECTURE.md)** - Detailed system architecture
   - Complete data & processing pipeline
@@ -584,22 +575,6 @@ This project includes comprehensive documentation covering all aspects of the sy
   - Outputs to `docs/figures/` directory
 
 ### 🚀 Quick Start for Documentation
-
-**To view the IEEE paper:**
-```bash
-# Option 1: Use Overleaf (recommended - no installation)
-# 1. Go to https://www.overleaf.com/
-# 2. Upload docs/IEEE_Final_Report.tex
-# 3. View auto-compiled PDF
-
-# Option 2: Compile locally (requires LaTeX)
-cd docs
-pdflatex IEEE_Final_Report.tex
-bibtex IEEE_Final_Report
-pdflatex IEEE_Final_Report.tex
-pdflatex IEEE_Final_Report.tex
-# Output: IEEE_Final_Report.pdf
-```
 
 **To generate figures:**
 ```bash
@@ -634,11 +609,6 @@ Located in `examples/` directory:
 1. Read [SYSTEM_ARCHITECTURE.md](docs/SYSTEM_ARCHITECTURE.md) for technical details
 2. Review source code in `src/builder.py`
 3. Check test cases in `tests/test_builder.py`
-
-**For Researchers:**
-1. Read the [IEEE Final Report](docs/IEEE_Final_Report.tex)
-2. Generate figures: `cd docs && python generate_figures.py`
-3. Compile LaTeX or view on Overleaf
 
 ---
 
@@ -1147,4 +1117,3 @@ python tests/test_builder.py
 
 ---
 
-**🎉 Welcome to 3D Floor Plan Converter v2.0! Start transforming floor plans today.**
